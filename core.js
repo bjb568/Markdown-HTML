@@ -109,7 +109,7 @@ function inlineMarkdown(input) {
 	}).join('') + open.join('');
 };
 function markdown(input) {
-	if (input.indexOf('\n') == -1 && input.substr(0, 2) != '> ' && input.substr(0, 2) != '- ' && input.substr(0, 2) != '* ' && input.substr(0, 4) != '    ' && input[0] != '\t' && !input.match(/^(\w[.)]|#{1,6}) /)) return inlineMarkdown(input);
+	if (input.indexOf('\n') == -1 && input.substr(0, 2) != '> ' && input.substr(0, 2) != '- ' && input.substr(0, 2) != '* ' && input.substr(0, 4) != '    ' && input[0] != '\t' && !input.match(/^(\w+[.)]|#{1,6}) /)) return inlineMarkdown(input);
 	var blockquote = '',
 		ul = '',
 		ol = '',
@@ -117,6 +117,7 @@ function markdown(input) {
 		code = '';
 	return input.split('\n').map(function(val, i, arr) {
 		if (!val) return '';
+		var f;
 		if (val.substr(0, 2) == '> ') {
 			val = val.substr(2);
 			if (arr[i + 1] && arr[i + 1].substr(0, 2) == '> ') {
@@ -145,14 +146,14 @@ function markdown(input) {
 				ul = '';
 				return arg + '</ul>';
 			}
-		} else if (val.match(/^\w[.)] /)) {
+		} else if (f = val.match(/^\w+[.)] /)) {
 			if (!ol) ol = '<ol>';
-			val = val.substr(3);
+			val = val.substr(f[0].length);
 			if (li) {
 				ol += '<li>' + markdown(li) + '</li>';
 				li = '';
 			};
-			if (arr[i + 1] && arr[i + 1].match(/^\w[.)] /)) {
+			if (arr[i + 1] && arr[i + 1].match(/^\w+[.)] /)) {
 				ol += '<li>' + inlineMarkdown(val) + '</li>';
 				return '';
 			} else if (arr[i + 1] && (arr[i + 1][0] == '\t' || arr[i + 1] && arr[i + 1].substr(0, 4) == '    ')) {
@@ -169,7 +170,7 @@ function markdown(input) {
 				var arg = ul + '<li>' + markdown(li) + '</li>';
 				li = '';
 				return arg + '</ul>';
-			} else if (ol && (!arr[i + 1] || (arr[i + 1][0] != '\t' && arr[i + 1].substr(0, 4) != '    ' && !arr[i + 1].match(/^\w[.)] /)))) {
+			} else if (ol && (!arr[i + 1] || (arr[i + 1][0] != '\t' && arr[i + 1].substr(0, 4) != '    ' && !arr[i + 1].match(/^\w+[.)] /)))) {
 				var arg = ol + '<li>' + markdown(li) + '</li>';
 				li = '';
 				return arg + '</ol>';
@@ -181,7 +182,7 @@ function markdown(input) {
 				var arg = ul + '<li>' + markdown(li) + '</li>';
 				li = '';
 				return arg + '</ul>';
-			} else if (ol && (!arr[i + 1] || (arr[i + 1][0] != '\t' && arr[i + 1].substr(0, 4) != '    ' && !arr[i + 1].match(/^\w[.)] /)))) {
+			} else if (ol && (!arr[i + 1] || (arr[i + 1][0] != '\t' && arr[i + 1].substr(0, 4) != '    ' && !arr[i + 1].match(/^\w+[.)] /)))) {
 				var arg = ol + '<li>' + markdown(li) + '</li>';
 				li = '';
 				return arg + '</ol>';
@@ -203,8 +204,8 @@ function markdown(input) {
 				return '<code class="blk">' + arg + '</code>';
 			} else code += '\n';
 			return '';
-		} else if ((i = val.match(/^#{1,6} /)) && (i = i[0].length - 1)) {
-			return '<h' + i + '>' + inlineMarkdown(val.substr(i + 1)) + '</h' + i + '>';
+		} else if ((f = val.match(/^#{1,6} /)) && (f = f[0].length - 1)) {
+			return '<h' + f + '>' + inlineMarkdown(val.substr(f + 1)) + '</h' + f + '>';
 		} else return '<p>' + inlineMarkdown(val) + '</p>';
 	}).join('');
 };
