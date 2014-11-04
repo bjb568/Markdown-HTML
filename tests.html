@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="initial-scale=1" />
+		<script src="core.js"></script>
+		<title>Markdown-HTML Tests</title>
+	</head>
+	<body>
+		<h1>Markdown-HTML Tests</h1>
+		<div id="output"></div>
+		<style>
+			.pass { color: #0f0 }
+			.fail { color: #f00 }
+			#output div {
+				background: #eee;
+				margin: 16px 32px;
+				padding: 6px;
+			}
+			pre { margin: 4px }
+			summary {
+				outline: none;
+				margin-bottom: 16px;
+			}
+		</style>
+		<script>
+			var output = document.getElementById('output');
+			var h2 = document.createElement('h2');
+			h2.appendChild(document.createTextNode('Hello World'));
+			var returned = markdown('Hello World');
+			if (returned == 'Hello World') {
+				h2.appendChild(document.createTextNode(' - passed'));
+				h2.classList.add('pass');
+				output.appendChild(h2);
+			} else {
+				h2.appendChild(document.createTextNode(' - failed'));
+				h2.classList.add('fail');
+				output.appendChild(h2);
+				var div = document.createElement('div');
+				div.appendChild(document.createTextNode('Test was:'));
+				var test = document.createElement('pre');
+				test.appendChild(document.createTextNode('Hello World'));
+				div.appendChild(test);
+				div.appendChild(document.createTextNode('Expected:'));
+				var expected = document.createElement('pre');
+				expected.appendChild(document.createTextNode('Hello World'));
+				div.appendChild(expected);
+				div.appendChild(document.createTextNode('Result:'));
+				var result = document.createElement('pre');
+				result.appendChild(document.createTextNode(returned));
+				div.appendChild(result);
+				output.appendChild(div);
+			}
+			var inlines = [
+				{
+					md: '*',
+					start: '<em>',
+					end: '</em>'
+				},
+				{
+					md: '_',
+					start: '<strong>',
+					end: '</strong>'
+				},
+				{
+					md: '---',
+					start: '<del>',
+					end: '</del>'
+				},
+				{
+					md: '+++',
+					start: '<ins>',
+					end: '</ins>'
+				}
+			];
+			var inlineFormattingTests = [];
+			for (var n = 1; n < inlines.length; n++) {
+				var lim = Math.pow(inlines.length, n);
+				outer: for (i = 0; i < lim; i++) {
+					var arr = [];
+					for (var j = 0; j < n; j++) {
+						var el = inlines[Math.floor(i / Math.pow(inlines.length, j)) % inlines.length];
+						if (arr.indexOf(el) != -1) continue outer;
+						arr.push(el);
+					}
+					var f = ['start ', 'start '];
+					for (var j = 0; j < n; j++) {
+						f[0] += arr[j].md;
+						f[1] += arr[j].start;
+					}
+					f[0] += 'test';
+					f[1] += 'test';
+					for (var j = n - 1; j >= 0; j--) {
+						f[0] += arr[j].md;
+						f[1] += arr[j].end;
+					}
+					f[0] += ' end';
+					f[1] += ' end';
+					inlineFormattingTests.push(f);
+				}
+			}
+			var inlineFormattingBasics = inlineFormattingTests;
+			var inlineFormattingExtras = inlineFormattingTests.map(function(val) {
+				return [val[0].replace('test', '^test'), val[1].replace('test', '<sup>test</sup>')];
+			}).concat(inlineFormattingTests.map(function(val) {
+				return [val[0].replace('test', '^(test)'), val[1].replace('test', '<sup>test</sup>')];
+			})).concat(inlineFormattingTests.map(function(val) {
+				return [val[0].replace('test', '$(test)'), val[1].replace('test', '<sub>test</sub>')];
+			}));
+			inlineFormattingTests = inlineFormattingTests.concat([
+				['start ^test end', 'start <sup>test</sup> end'],
+				['start ^(test) end', 'start <sup>test</sup> end'],
+				['start $(test) end', 'start <sub>test</sub> end']
+			]).concat(inlineFormattingExtras);
+			var failed = [];
+			for (var i = 0; i < inlineFormattingTests.length; i++) {
+				result = markdown(inlineFormattingTests[i][0]);
+				if (result != inlineFormattingTests[i][1]) failed.push(inlineFormattingTests[i].concat(result));
+			}
+			var h2 = document.createElement('h2');
+			h2.appendChild(document.createTextNode('Inline formatting'));
+			if (failed.length == 0) {
+				h2.appendChild(document.createTextNode(' - passed'));
+				h2.classList.add('pass');
+				output.appendChild(h2);
+			} else {
+				h2.appendChild(document.createTextNode(' - failed ' + failed.length + ' of ' + inlineFormattingTests.length));
+				h2.classList.add('fail');
+				output.appendChild(h2);
+				var details = document.createElement('details');
+				var summary = document.createElement('summary');
+				summary.appendChild(document.createTextNode('Failed tests'));
+				details.appendChild(summary);
+				for (var i = 0; i < failed.length; i++) {
+					var div = document.createElement('div');
+					div.appendChild(document.createTextNode('Test was:'));
+					var test = document.createElement('pre');
+					test.appendChild(document.createTextNode(failed[i][0]));
+					div.appendChild(test);
+					div.appendChild(document.createTextNode('Expected:'));
+					var expected = document.createElement('pre');
+					expected.appendChild(document.createTextNode(failed[i][1]));
+					div.appendChild(expected);
+					div.appendChild(document.createTextNode('Result:'));
+					var result = document.createElement('pre');
+					result.appendChild(document.createTextNode(failed[i][2]));
+					div.appendChild(result);
+					details.appendChild(div);
+				}
+				output.appendChild(details);
+			}
+			var inlineCodeTests = inlineFormattingBasics.map(function(val) {
+				return [val[0].replace('test', '`test`'), val[1].replace('test', '<code>test</code>')];
+			}).concat([
+				['start `*_---+++test^foo$(bar)<&` end', 'start <code>*_---+++test^foo$(bar)&lt;&amp;</code> end']
+			]),
+				failed = [];
+			for (var i = 0; i < inlineCodeTests.length; i++) {
+				result = markdown(inlineCodeTests[i][0]);
+				if (result != inlineCodeTests[i][1]) failed.push(inlineCodeTests[i].concat(result));
+			}
+			var h2 = document.createElement('h2');
+			h2.appendChild(document.createTextNode('Inline code'));
+			if (failed.length == 0) {
+				h2.appendChild(document.createTextNode(' - passed'));
+				h2.classList.add('pass');
+				output.appendChild(h2);
+			} else {
+				h2.appendChild(document.createTextNode(' - failed ' + failed.length + ' of ' + inlineCodeTests.length));
+				h2.classList.add('fail');
+				output.appendChild(h2);
+				var details = document.createElement('details');
+				var summary = document.createElement('summary');
+				summary.appendChild(document.createTextNode('Failed tests'));
+				details.appendChild(summary);
+				for (var i = 0; i < failed.length; i++) {
+					var div = document.createElement('div');
+					div.appendChild(document.createTextNode('Test was:'));
+					var test = document.createElement('pre');
+					test.appendChild(document.createTextNode(failed[i][0]));
+					div.appendChild(test);
+					div.appendChild(document.createTextNode('Expected:'));
+					var expected = document.createElement('pre');
+					expected.appendChild(document.createTextNode(failed[i][1]));
+					div.appendChild(expected);
+					div.appendChild(document.createTextNode('Result:'));
+					var result = document.createElement('pre');
+					result.appendChild(document.createTextNode(failed[i][2]));
+					div.appendChild(result);
+					details.appendChild(div);
+				}
+				output.appendChild(details);
+			}
+			var inlineEscapeTests = [
+				['start \\* end', 'start * end'],
+				['start \\_ end', 'start _ end'],
+				['start \\--- end', 'start --- end'],
+				['start \\+++ end', 'start +++ end'],
+				['start \\^test end', 'start ^test end'],
+				['start \\^(test) end', 'start ^(test) end'],
+				['start ^\\(test) end', 'start ^(test) end'],
+				['start ^(test\\) end', 'start ^(test) end'],
+				['start \\$(test) end', 'start $(test) end'],
+				['start $\\(test) end', 'start $(test) end'],
+				['start $(test\\) end', 'start $(test) end'],
+				['start ^(test&) end', 'start <sup>test&amp;</sup> end'],
+				['start $(test&) end', 'start <sub>test&amp;</sub> end'],
+				['&amp;&lt; end', '&amp;amp;&amp;lt; end'],
+				['<script> end', '&lt;script> end']
+			],
+				failed = [];
+			for (var i = 0; i < inlineEscapeTests.length; i++) {
+				result = markdown(inlineEscapeTests[i][0]);
+				if (result != inlineEscapeTests[i][1]) failed.push(inlineEscapeTests[i].concat(result));
+			}
+			var h2 = document.createElement('h2');
+			h2.appendChild(document.createTextNode('Inline escapement'));
+			if (failed.length == 0) {
+				h2.appendChild(document.createTextNode(' - passed'));
+				h2.classList.add('pass');
+				output.appendChild(h2);
+			} else {
+				h2.appendChild(document.createTextNode(' - failed ' + failed.length + ' of ' + inlineEscapeTests.length));
+				h2.classList.add('fail');
+				output.appendChild(h2);
+				var details = document.createElement('details');
+				var summary = document.createElement('summary');
+				summary.appendChild(document.createTextNode('Failed tests'));
+				details.appendChild(summary);
+				for (var i = 0; i < failed.length; i++) {
+					var div = document.createElement('div');
+					div.appendChild(document.createTextNode('Test was:'));
+					var test = document.createElement('pre');
+					test.appendChild(document.createTextNode(failed[i][0]));
+					div.appendChild(test);
+					div.appendChild(document.createTextNode('Expected:'));
+					var expected = document.createElement('pre');
+					expected.appendChild(document.createTextNode(failed[i][1]));
+					div.appendChild(expected);
+					div.appendChild(document.createTextNode('Result:'));
+					var result = document.createElement('pre');
+					result.appendChild(document.createTextNode(failed[i][2]));
+					div.appendChild(result);
+					details.appendChild(div);
+				}
+				output.appendChild(details);
+			}
+			var blockTests = [
+				['Hello\nworld', '<p>Hello</p><p>world</p>'],
+				['    code^block', '<code class="blk">code^block</code>'],
+				['    code^block\n    *line 2*', '<code class="blk">code^block\n*line 2*</code>'],
+				['    code^block\nhi', '<code class="blk">code^block</code><p>hi</p>'],
+				['\tcode^block', '<code class="blk">code^block</code>'],
+				['\tcode^block\n    *line 2*', '<code class="blk">code^block\n*line 2*</code>'],
+				['\tcode^block\n\t*line 2*', '<code class="blk">code^block\n*line 2*</code>'],
+				['\tcode^block\nhi', '<code class="blk">code^block</code><p>hi</p>'],
+				['- Hello\nworld', '<ul><li>Hello</li></ul><p>world</p>'],
+				['* Hello\nworld', '<ul><li>Hello</li></ul><p>world</p>'],
+				['a. Hello\nworld', '<ol><li>Hello</li></ol><p>world</p>'],
+				['1. Hello\nworld', '<ol><li>Hello</li></ol><p>world</p>'],
+				['a) Hello\nworld', '<ol><li>Hello</li></ol><p>world</p>'],
+				['1) Hello\nworld', '<ol><li>Hello</li></ol><p>world</p>'],
+				['a. Hello\nb. world', '<ol><li>Hello</li><li>world</li></ol>'],
+				['1. Hello\n2. world', '<ol><li>Hello</li><li>world</li></ol>'],
+				['a) Hello\nb) world', '<ol><li>Hello</li><li>world</li></ol>'],
+				['1) Hello\n2) world', '<ol><li>Hello</li><li>world</li></ol>'],
+				['a. Hello\n- world', '<ol><li>Hello</li></ol><ul><li>world</li></ul>'],
+				['1. Hello\n- world', '<ol><li>Hello</li></ol><ul><li>world</li></ul>'],
+				['a. Hello\n* world', '<ol><li>Hello</li></ol><ul><li>world</li></ul>'],
+				['1. Hello\n* world', '<ol><li>Hello</li></ol><ul><li>world</li></ul>'],
+				['a) Hello\n- world', '<ol><li>Hello</li></ol><ul><li>world</li></ul>'],
+				['1) Hello\n- world', '<ol><li>Hello</li></ol><ul><li>world</li></ul>'],
+				['a) Hello\n* world', '<ol><li>Hello</li></ol><ul><li>world</li></ul>'],
+				['1) Hello\n* world', '<ol><li>Hello</li></ol><ul><li>world</li></ul>'],
+				['- Hello\na. world', '<ul><li>Hello</li></ul><ol><li>world</li></ol>'],
+				['- Hello\n1. world', '<ul><li>Hello</li></ul><ol><li>world</li></ol>'],
+				['* Hello\na. world', '<ul><li>Hello</li></ul><ol><li>world</li></ol>'],
+				['* Hello\n1. world', '<ul><li>Hello</li></ul><ol><li>world</li></ol>'],
+				['- Hello\na) world', '<ul><li>Hello</li></ul><ol><li>world</li></ol>'],
+				['- Hello\n1) world', '<ul><li>Hello</li></ul><ol><li>world</li></ol>'],
+				['* Hello\na) world', '<ul><li>Hello</li></ul><ol><li>world</li></ol>'],
+				['* Hello\n1) world', '<ul><li>Hello</li></ul><ol><li>world</li></ol>'],
+				['* Hello\n    world', '<ul><li><p>Hello</p><p>world</p></li></ul>'],
+				['- Hello\n    world', '<ul><li><p>Hello</p><p>world</p></li></ul>'],
+				['a. Hello\n    world', '<ol><li><p>Hello</p><p>world</p></li></ol>'],
+				['1. Hello\n    world', '<ol><li><p>Hello</p><p>world</p></li></ol>'],
+				['a) Hello\n    world', '<ol><li><p>Hello</p><p>world</p></li></ol>'],
+				['1) Hello\n    world', '<ol><li><p>Hello</p><p>world</p></li></ol>'],
+				['* Hello\n\tworld', '<ul><li><p>Hello</p><p>world</p></li></ul>'],
+				['- Hello\n\tworld', '<ul><li><p>Hello</p><p>world</p></li></ul>'],
+				['a. Hello\n\tworld', '<ol><li><p>Hello</p><p>world</p></li></ol>'],
+				['1. Hello\n\tworld', '<ol><li><p>Hello</p><p>world</p></li></ol>'],
+				['a) Hello\n\tworld', '<ol><li><p>Hello</p><p>world</p></li></ol>'],
+				['1) Hello\n\tworld', '<ol><li><p>Hello</p><p>world</p></li></ol>'],
+				['* Hello\n    > world', '<ul><li><p>Hello</p><blockquote>world</blockquote></li></ul>'],
+				['- Hello\n    > world', '<ul><li><p>Hello</p><blockquote>world</blockquote></li></ul>'],
+				['a. Hello\n    > world', '<ol><li><p>Hello</p><blockquote>world</blockquote></li></ol>'],
+				['1. Hello\n    > world', '<ol><li><p>Hello</p><blockquote>world</blockquote></li></ol>'],
+				['a) Hello\n    > world', '<ol><li><p>Hello</p><blockquote>world</blockquote></li></ol>'],
+				['1) Hello\n    > world', '<ol><li><p>Hello</p><blockquote>world</blockquote></li></ol>'],
+				['* Hello\n\t> world', '<ul><li><p>Hello</p><blockquote>world</blockquote></li></ul>'],
+				['- Hello\n\t> world', '<ul><li><p>Hello</p><blockquote>world</blockquote></li></ul>'],
+				['a. Hello\n\t> world', '<ol><li><p>Hello</p><blockquote>world</blockquote></li></ol>'],
+				['1. Hello\n\t> world', '<ol><li><p>Hello</p><blockquote>world</blockquote></li></ol>'],
+				['a) Hello\n\t> world', '<ol><li><p>Hello</p><blockquote>world</blockquote></li></ol>'],
+				['1) Hello\n\t> world', '<ol><li><p>Hello</p><blockquote>world</blockquote></li></ol>'],
+				['* Hello\n        *code*', '<ul><li><p>Hello</p><code class="blk">*code*</code></li></ul>'],
+				['- Hello\n        *code*', '<ul><li><p>Hello</p><code class="blk">*code*</code></li></ul>'],
+				['a. Hello\n        *code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['1. Hello\n        *code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['a) Hello\n        *code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['1) Hello\n        *code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['* Hello\n\t    *code*', '<ul><li><p>Hello</p><code class="blk">*code*</code></li></ul>'],
+				['- Hello\n\t    *code*', '<ul><li><p>Hello</p><code class="blk">*code*</code></li></ul>'],
+				['a. Hello\n\t    *code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['1. Hello\n\t    *code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['a) Hello\n\t    *code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['1) Hello\n\t    *code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['* Hello\n    \t*code*', '<ul><li><p>Hello</p><code class="blk">*code*</code></li></ul>'],
+				['- Hello\n    \t*code*', '<ul><li><p>Hello</p><code class="blk">*code*</code></li></ul>'],
+				['a. Hello\n    \t*code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['1. Hello\n    \t*code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['a) Hello\n    \t*code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['1) Hello\n    \t*code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['* Hello\n\t\t*code*', '<ul><li><p>Hello</p><code class="blk">*code*</code></li></ul>'],
+				['- Hello\n\t\t*code*', '<ul><li><p>Hello</p><code class="blk">*code*</code></li></ul>'],
+				['a. Hello\n\t\t*code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['1. Hello\n\t\t*code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['a) Hello\n\t\t*code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>'],
+				['1) Hello\n\t\t*code*', '<ol><li><p>Hello</p><code class="blk">*code*</code></li></ol>']
+			],
+				failed = [];
+			for (var i = 0; i < blockTests.length; i++) {
+				result = markdown(blockTests[i][0]);
+				if (result != blockTests[i][1]) failed.push(blockTests[i].concat(result));
+			}
+			var h2 = document.createElement('h2');
+			h2.appendChild(document.createTextNode('Block elements'));
+			if (failed.length == 0) {
+				h2.appendChild(document.createTextNode(' - passed'));
+				h2.classList.add('pass');
+				output.appendChild(h2);
+			} else {
+				h2.appendChild(document.createTextNode(' - failed ' + failed.length + ' of ' + blockTests.length));
+				h2.classList.add('fail');
+				output.appendChild(h2);
+				var details = document.createElement('details');
+				var summary = document.createElement('summary');
+				summary.appendChild(document.createTextNode('Failed tests'));
+				details.appendChild(summary);
+				for (var i = 0; i < failed.length; i++) {
+					var div = document.createElement('div');
+					div.appendChild(document.createTextNode('Test was:'));
+					var test = document.createElement('pre');
+					test.appendChild(document.createTextNode(failed[i][0]));
+					div.appendChild(test);
+					div.appendChild(document.createTextNode('Expected:'));
+					var expected = document.createElement('pre');
+					expected.appendChild(document.createTextNode(failed[i][1]));
+					div.appendChild(expected);
+					div.appendChild(document.createTextNode('Result:'));
+					var result = document.createElement('pre');
+					result.appendChild(document.createTextNode(failed[i][2]));
+					div.appendChild(result);
+					details.appendChild(div);
+				}
+				output.appendChild(details);
+			}
+			var blockquoteTests = blockTests.map(function(val) {
+				return [val[0].split('\n').map(function(val) {
+					return '> ' + val;
+				}).join('\n'), '<blockquote>' + val[1] + '</blockquote>'];
+			});
+			var failed = [];
+			for (var i = 0; i < blockquoteTests.length; i++) {
+				result = markdown(blockquoteTests[i][0]);
+				if (result != blockquoteTests[i][1]) failed.push(blockquoteTests[i].concat(result));
+			}
+			var h2 = document.createElement('h2');
+			h2.appendChild(document.createTextNode('Blockquote'));
+			if (failed.length == 0) {
+				h2.appendChild(document.createTextNode(' - passed'));
+				h2.classList.add('pass');
+				output.appendChild(h2);
+			} else {
+				h2.appendChild(document.createTextNode(' - failed ' + failed.length + ' of ' + blockquoteTests.length));
+				h2.classList.add('fail');
+				output.appendChild(h2);
+				var details = document.createElement('details');
+				var summary = document.createElement('summary');
+				summary.appendChild(document.createTextNode('Failed tests'));
+				details.appendChild(summary);
+				for (var i = 0; i < failed.length; i++) {
+					var div = document.createElement('div');
+					div.appendChild(document.createTextNode('Test was:'));
+					var test = document.createElement('pre');
+					test.appendChild(document.createTextNode(failed[i][0]));
+					div.appendChild(test);
+					div.appendChild(document.createTextNode('Expected:'));
+					var expected = document.createElement('pre');
+					expected.appendChild(document.createTextNode(failed[i][1]));
+					div.appendChild(expected);
+					div.appendChild(document.createTextNode('Result:'));
+					var result = document.createElement('pre');
+					result.appendChild(document.createTextNode(failed[i][2]));
+					div.appendChild(result);
+					details.appendChild(div);
+				}
+				output.appendChild(details);
+			}
+			var escapeTests = [
+				['\\* test', '* test'],
+				['\\- test', '- test'],
+				['a\\) test', 'a) test'],
+				['a\\. test', 'a. test'],
+				['1\\) test', '1) test'],
+				['1\\. test', '1. test'],
+				['\\> test', '> test']
+			];
+			var failed = [];
+			for (var i = 0; i < escapeTests.length; i++) {
+				result = markdown(escapeTests[i][0]);
+				if (result != escapeTests[i][1]) failed.push(escapeTests[i].concat(result));
+			}
+			var h2 = document.createElement('h2');
+			h2.appendChild(document.createTextNode('List escapement'));
+			if (failed.length == 0) {
+				h2.appendChild(document.createTextNode(' - passed'));
+				h2.classList.add('pass');
+				output.appendChild(h2);
+			} else {
+				h2.appendChild(document.createTextNode(' - failed ' + failed.length + ' of ' + escapeTests.length));
+				h2.classList.add('fail');
+				output.appendChild(h2);
+				var details = document.createElement('details');
+				var summary = document.createElement('summary');
+				summary.appendChild(document.createTextNode('Failed tests'));
+				details.appendChild(summary);
+				for (var i = 0; i < failed.length; i++) {
+					var div = document.createElement('div');
+					div.appendChild(document.createTextNode('Test was:'));
+					var test = document.createElement('pre');
+					test.appendChild(document.createTextNode(failed[i][0]));
+					div.appendChild(test);
+					div.appendChild(document.createTextNode('Expected:'));
+					var expected = document.createElement('pre');
+					expected.appendChild(document.createTextNode(failed[i][1]));
+					div.appendChild(expected);
+					div.appendChild(document.createTextNode('Result:'));
+					var result = document.createElement('pre');
+					result.appendChild(document.createTextNode(failed[i][2]));
+					div.appendChild(result);
+					details.appendChild(div);
+				}
+				output.appendChild(details);
+			}
+		</script>
+	</body>
+</html>
