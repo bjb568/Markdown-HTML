@@ -29,8 +29,11 @@ function inlineMarkdown(input) {
 	var dot = Math.random().toString();
 	while (input.indexOf(dot) != -1 || [backslash, graveaccent, asterisk, underscore, dash, plus].indexOf(dot) != -1) dot = Math.random().toString();
 	input = input.replaceAll('\\.', dot);
+	var hash = Math.random().toString();
+	while (input.indexOf(hash) != -1 || [backslash, graveaccent, asterisk, underscore, dash, plus, dot].indexOf(hash) != -1) hash = Math.random().toString();
+	input = input.replaceAll('\\#', hash);
 	var gt = Math.random().toString();
-	while (input.indexOf(gt) != -1 || [backslash, graveaccent, asterisk, underscore, dash, plus, dot].indexOf(gt) != -1) gt = Math.random().toString();
+	while (input.indexOf(gt) != -1 || [backslash, graveaccent, asterisk, underscore, dash, plus, dot, hash].indexOf(gt) != -1) gt = Math.random().toString();
 	input = input.replaceAll('\\>', gt);
 	var paren = '#' + Math.random().toString();
 	while (input.indexOf(paren) != -1) paren = '#' + Math.random().toString();
@@ -46,12 +49,12 @@ function inlineMarkdown(input) {
 	input = input.replaceAll('\\$', dollar);
 	var open = [];
 	return input.split('`').map(function(val, i, arr) {
-		if (i % 2) return '<code>' + html(val.replaceAll([backslash, graveaccent, asterisk, underscore, dash, plus, dot, gt, paren, cparen, carrot, dollar], ['\\\\', '\\`', '\\*', '\\_', '\\-', '\\+', '\\.', '\\>', '\\(', '\\)', '\\^'])) + '</code>';
+		if (i % 2) return '<code>' + html(val.replaceAll([backslash, graveaccent, asterisk, underscore, dash, plus, dot, hash, gt, paren, cparen, carrot, dollar], ['\\\\', '\\`', '\\*', '\\_', '\\-', '\\+', '\\.', '\\#', '\\>', '\\(', '\\)', '\\^'])) + '</code>';
 		var parsed = val.split('*').map(function(val, i, arr) {
 			var parsed = val.split('_').map(function(val, i, arr) {
 				var parsed = val.split('---').map(function(val, i, arr) {
 					var parsed = val.split('+++').map(function(val, i, arr) {
-						var parsed = html(val.replaceAll([backslash, graveaccent, asterisk, underscore, dash, plus, dot, gt], ['\\', '`', '*', '_', '-', '+', '.', '>']))
+						var parsed = html(val.replaceAll([backslash, graveaccent, asterisk, underscore, dash, plus, dot, hash, gt], ['\\', '`', '*', '_', '-', '+', '.', '#', '>']))
 							.replace(/!\[([^\]]+)]\(([^\s("]+\.[^\s()"]+)\)/g, '<img alt="$1" src="$2" />')
 							.replace(/\[([^\]]+)]\((https?:\/\/[^\s("]+\.[^\s()"]+)\)/g, '$1'.link('$2'))
 							.replace(/([^;["])(https?:\/\/([^\s("]+\.[^\s()"]+))/g, '$1' + '$3'.link('$2'))

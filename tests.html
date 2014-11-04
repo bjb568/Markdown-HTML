@@ -152,7 +152,8 @@
 			var inlineCodeTests = inlineFormattingBasics.map(function(val) {
 				return [val[0].replace('test', '`test`'), val[1].replace('test', '<code>test</code>')];
 			}).concat([
-				['start `*_---+++test^foo$(bar)<&` end', 'start <code>*_---+++test^foo$(bar)&lt;&amp;</code> end']
+				['start `*_---+++test^foo$(bar)<&` end', 'start <code>*_---+++test^foo$(bar)&lt;&amp;</code> end'],
+				['start `\\\\.\\#\\>` end', 'start <code>\\\\.\\#\\></code> end']
 			]),
 				failed = [];
 			for (var i = 0; i < inlineCodeTests.length; i++) {
@@ -206,7 +207,8 @@
 				['start ^(test&) end', 'start <sup>test&amp;</sup> end'],
 				['start $(test&) end', 'start <sub>test&amp;</sub> end'],
 				['&amp;&lt; end', '&amp;amp;&amp;lt; end'],
-				['<script> end', '&lt;script> end']
+				['<script> end', '&lt;script> end'],
+				['\\\\.\\#\\>', '\\.#>']
 			],
 				failed = [];
 			for (var i = 0; i < inlineEscapeTests.length; i++) {
@@ -431,7 +433,13 @@
 				['a. <&', '<ol><li>&lt;&amp;</li></ol>'],
 				['1) <&', '<ol><li>&lt;&amp;</li></ol>'],
 				['1. <&', '<ol><li>&lt;&amp;</li></ol>'],
-				['> <&', '<blockquote>&lt;&amp;</blockquote>']
+				['> <&', '<blockquote>&lt;&amp;</blockquote>'],
+				['\\# h1', '# h1'],
+				['\\## h2', '## h2'],
+				['\\### h3', '### h3'],
+				['\\#### h4', '#### h4'],
+				['\\##### h5', '##### h5'],
+				['\\###### h6', '###### h6']
 			];
 			var failed = [];
 			for (var i = 0; i < escapeTests.length; i++) {
