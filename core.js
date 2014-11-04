@@ -135,13 +135,13 @@ function markdown(input) {
 				li = '';
 			};
 			if (arr[i + 1] && (arr[i + 1].substr(0, 2) == '- ' || arr[i + 1] && arr[i + 1].substr(0, 2) == '* ')) {
-				ul += '<li>' + val + '</li>';
+				ul += '<li>' + inlineMarkdown(val) + '</li>';
 				return '';
 			} else if (arr[i + 1] && (arr[i + 1][0] == '\t' || arr[i + 1] && arr[i + 1].substr(0, 4) == '    ')) {
 				li += val + '\n';
 				return '';
 			} else {
-				var arg = ul + '<li>' + val + '</li>';
+				var arg = ul + '<li>' + markdown(val) + '</li>';
 				ul = '';
 				return arg + '</ul>';
 			}
@@ -153,13 +153,13 @@ function markdown(input) {
 				li = '';
 			};
 			if (arr[i + 1] && arr[i + 1].match(/^\w[.)] /)) {
-				ol += '<li>' + val + '</li>';
+				ol += '<li>' + inlineMarkdown(val) + '</li>';
 				return '';
 			} else if (arr[i + 1] && (arr[i + 1][0] == '\t' || arr[i + 1] && arr[i + 1].substr(0, 4) == '    ')) {
 				li += val + '\n';
 				return '';
 			} else {
-				var arg = ol + '<li>' + val + '</li>';
+				var arg = ol + '<li>' + inlineMarkdown(val) + '</li>';
 				ol = '';
 				return arg + '</ol>';
 			}

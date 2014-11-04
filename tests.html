@@ -415,7 +415,14 @@
 				['a\\. test', 'a. test'],
 				['1\\) test', '1) test'],
 				['1\\. test', '1. test'],
-				['\\> test', '> test']
+				['\\> test', '> test'],
+				['* <&', '<ul><li>&lt;&amp;</li></ul>'],
+				['- <&', '<ul><li>&lt;&amp;</li></ul>'],
+				['a) <&', '<ol><li>&lt;&amp;</li></ol>'],
+				['a. <&', '<ol><li>&lt;&amp;</li></ol>'],
+				['1) <&', '<ol><li>&lt;&amp;</li></ol>'],
+				['1. <&', '<ol><li>&lt;&amp;</li></ol>'],
+				['> <&', '<blockquote>&lt;&amp;</blockquote>']
 			];
 			var failed = [];
 			for (var i = 0; i < escapeTests.length; i++) {
@@ -423,7 +430,7 @@
 				if (result != escapeTests[i][1]) failed.push(escapeTests[i].concat(result));
 			}
 			var h2 = document.createElement('h2');
-			h2.appendChild(document.createTextNode('List escapement'));
+			h2.appendChild(document.createTextNode('Block escapement'));
 			if (failed.length == 0) {
 				h2.appendChild(document.createTextNode(' - passed'));
 				h2.classList.add('pass');
