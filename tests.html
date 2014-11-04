@@ -247,6 +247,13 @@
 			}
 			var blockTests = [
 				['Hello\nworld', '<p>Hello</p><p>world</p>'],
+				['# h1', '<h1>h1</h1>'],
+				['## h2', '<h2>h2</h2>'],
+				['### h3', '<h3>h3</h3>'],
+				['#### h4', '<h4>h4</h4>'],
+				['##### h5', '<h5>h5</h5>'],
+				['###### h6', '<h6>h6</h6>'],
+				['####### h7', '####### h7'],
 				['    code^block', '<code class="blk">code^block</code>'],
 				['    code^block\n    *line 2*', '<code class="blk">code^block\n*line 2*</code>'],
 				['    code^block\nhi', '<code class="blk">code^block</code><p>hi</p>'],
