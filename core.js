@@ -4,7 +4,8 @@ String.prototype.replaceAll = function(find, replace) {
 	while (typeof(i = find.shift()) == 'string' && typeof(j = replace.shift()) == 'string') t = t.replaceAll(i || '', j || '');
 	return t;
 };
-function html(input) {
+function html(input, replaceQuoteOff) {
+	if (replaceQuoteOff) return input.toString().replaceAll(['&', '<'], ['&amp;', '&lt;']);
 	return input.toString().replaceAll(['&', '<', '"'], ['&amp;', '&lt;', '&quot;']);
 };
 function inlineMarkdown(input) {
@@ -54,11 +55,11 @@ function inlineMarkdown(input) {
 			var parsed = val.split('_').map(function(val, i, arr) {
 				var parsed = val.split('---').map(function(val, i, arr) {
 					var parsed = val.split('+++').map(function(val, i, arr) {
-						var parsed = html(val.replaceAll([backslash, graveaccent, asterisk, underscore, dash, plus, dot, hash, gt], ['\\', '`', '*', '_', '-', '+', '.', '#', '>']))
-							.replace(/!\[([^\]]+)]\(([^\s("]+\.[^\s()"]+)\)/g, '<img alt="$1" src="$2" />')
-							.replace(/\[([^\]]+)]\((https?:\/\/[^\s("]+\.[^\s()"]+)\)/g, '$1'.link('$2'))
-							.replace(/([^;["])(https?:\/\/([^\s("]+\.[^\s()"]+))/g, '$1' + '$3'.link('$2'))
-							.replace(/^(https?:\/\/([^\s("]+\.[^\s()"]+))/g, '$2'.link('$1'))
+						var parsed = html(val.replaceAll([backslash, graveaccent, asterisk, underscore, dash, plus, dot, hash, gt], ['\\', '`', '*', '_', '-', '+', '.', '#', '>']), true)
+							.replace(/!\[([^\]]+)]\(([^\s("\\]+\.[^\s()"\\]+)\)/g, '<img alt="$1" src="$2" />')
+							.replace(/\[([^\]]+)]\((https?:\/\/[^\s("\\]+\.[^\s()"\\]+)\)/g, '$1'.link('$2'))
+							.replace(/([^;["\\])(https?:\/\/([^\s("\\]+\.[^\s()"\\]+))/g, '$1' + '$3'.link('$2'))
+							.replace(/^(https?:\/\/([^\s("\\]+\.[^\s()"\\]+))/g, '$2'.link('$1'))
 							.replace(/\^(\w+)/g, '<sup>$1</sup>');
 						if (i % 2) {
 							var p = open.indexOf('</ins>')
