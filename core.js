@@ -7,10 +7,10 @@ String.prototype.replaceAll = function(find, replace) {
 function html(input, replaceQuoteOff) {
 	if (replaceQuoteOff) return input.toString().replaceAll(['&', '<'], ['&amp;', '&lt;']);
 	return input.toString().replaceAll(['&', '<', '"'], ['&amp;', '&lt;', '&quot;']);
-};
+}
 function markdownEscape(input) {
 	return input.replaceAll(['\\', '`', '*', '_', '-', '+', '.', '#', '>', '(', ')', '^', '$'], ['\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u000d', '\u000e', '\u000f', '\u0010', '\u0011', '\u0012', '\u0013']);
-};
+}
 function inlineMarkdown(input) {
 	var backslash = '\u0001';
 	input = input.replaceAll('\\\\', backslash);
@@ -65,7 +65,7 @@ function inlineMarkdown(input) {
 							.replace(/^(https?:\/\/([^\s("\\]+\.[^\s()"\\]+))/g, '$2'.link('$1'))
 							.replace(/\^(\w+)/g, '<sup>$1</sup>');
 						if (i % 2) {
-							var p = open.indexOf('</ins>')
+							var p = open.indexOf('</ins>');
 							if (p != -1) {
 								open.splice(p, 1);
 								return '</ins>' + parsed;
@@ -114,7 +114,7 @@ function inlineMarkdown(input) {
 		}).join('');
 		return parsed.replace(/\^\(([^)]+)\)/g, '<sup>$1</sup>').replace(/\$\(([^)]+)\)/g, '<sub>$1</sub>').replaceAll([paren, cparen, carrot, dollar], ['(', ')', '^', '$']);
 	}).join('') + open.join('');
-};
+}
 function markdown(input) {
 	if (input.indexOf('\n') == -1 && input.substr(0, 2) != '> ' && input.substr(0, 2) != '- ' && input.substr(0, 2) != '* ' && input.substr(0, 4) != '    ' && input[0] != '\t' && !input.match(/^(\w+[.)]|#{1,6}) /)) return inlineMarkdown(input);
 	var blockquote = '',
@@ -215,4 +215,4 @@ function markdown(input) {
 			return '<h' + f + '>' + inlineMarkdown(val.substr(f + 1)) + '</h' + f + '>';
 		} else return '<p>' + inlineMarkdown(val) + '</p>';
 	}).join('');
-};
+}
