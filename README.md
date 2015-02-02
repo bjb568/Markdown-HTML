@@ -1,4 +1,4 @@
 Markdown-HTML
 =============
 
-Simple Markdown to HTML converter
+This project aims to provide a simple and minimal Markdown to HTML converter.
