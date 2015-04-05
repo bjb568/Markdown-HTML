@@ -58,9 +58,24 @@
 					end: '</em>'
 				},
 				{
-					md: '_',
+					md: '**',
 					start: '<strong>',
 					end: '</strong>'
+				},
+				{
+					md: '_',
+					start: '<i>',
+					end: '</i>'
+				},
+				{
+					md: '–––',
+					start: '<s>',
+					end: '</s>'
+				},
+				{
+					md: '+++',
+					start: '<ins>',
+					end: '</ins>'
 				},
 				{
 					md: '---',
@@ -68,15 +83,40 @@
 					end: '</del>'
 				},
 				{
-					md: '+++',
-					start: '<ins>',
-					end: '</ins>'
+					md: '^^',
+					start: '<sup>',
+					end: '</sup>'
+				},
+				{
+					md: 'vv',
+					start: '<sub>',
+					end: '</sub>'
+				},
+				{
+					md: '[c]',
+					start: '<cite>',
+					end: '</cite>'
+				},
+				{
+					md: '[s]',
+					start: '<small>',
+					end: '</small>'
+				},
+				{
+					md: '[u]',
+					start: '<u>',
+					end: '</u>'
+				},
+				{
+					md: '[v]',
+					start: '<var>',
+					end: '</var>'
 				}
 			];
 			var inlineFormattingTests = [];
 			for (var n = 1; n < inlines.length; n++) {
 				var lim = Math.pow(inlines.length, n);
-				outer: for (i = 0; i < lim; i++) {
+				outer: for (i = 0; i < lim; i += i > inlines.length * inlines.length ? Math.random() * Math.sqrt(i) * 10 : 1) {
 					var arr = [];
 					for (var j = 0; j < n; j++) {
 						var el = inlines[Math.floor(i / Math.pow(inlines.length, j)) % inlines.length];
@@ -88,6 +128,7 @@
 						f[0] += arr[j].md;
 						f[1] += arr[j].start;
 					}
+					if (f[0].indexOf('***') != -1) continue;
 					f[0] += 'test';
 					f[1] += 'test';
 					for (var j = n - 1; j >= 0; j--) {
@@ -100,18 +141,11 @@
 				}
 			}
 			var inlineFormattingBasics = inlineFormattingTests;
-			var inlineFormattingExtras = inlineFormattingTests.map(function(val) {
-				return [val[0].replace('test', '^test'), val[1].replace('test', '<sup>test</sup>')];
-			}).concat(inlineFormattingTests.map(function(val) {
-				return [val[0].replace('test', '^(test)'), val[1].replace('test', '<sup>test</sup>')];
-			})).concat(inlineFormattingTests.map(function(val) {
-				return [val[0].replace('test', '$(test)'), val[1].replace('test', '<sub>test</sub>')];
-			}));
 			inlineFormattingTests = inlineFormattingTests.concat([
-				['start ^test end', 'start <sup>test</sup> end'],
-				['start ^(test) end', 'start <sup>test</sup> end'],
-				['start $(test) end', 'start <sub>test</sub> end']
-			]).concat(inlineFormattingExtras);
+				['start ^test end', 'start <sup>test</sup> end']
+			]).concat(inlineFormattingTests.map(function(val) {
+				return [val[0].replace('test', '^test'), val[1].replace('test', '<sup>test</sup>')];
+			}));
 			var failed = [];
 			for (var i = 0; i < inlineFormattingTests.length; i++) {
 				result = markdown(inlineFormattingTests[i][0]);
@@ -204,8 +238,6 @@
 				['start \\$(test) end', 'start $(test) end'],
 				['start $\\(test) end', 'start $(test) end'],
 				['start $(test\\) end', 'start $(test) end'],
-				['start ^(test&) end', 'start <sup>test&amp;</sup> end'],
-				['start $(test&) end', 'start <sub>test&amp;</sub> end'],
 				['&amp;&lt; end', '&amp;amp;&amp;lt; end'],
 				['<script> end', '&lt;script> end'],
 				['\\\\.\\#\\>', '\\.#>']
@@ -247,8 +279,67 @@
 				}
 				output.appendChild(details);
 			}
+			var inlineExtrasTests = [
+				['asp.net', 'asp.net'],
+				['http://asp.net', '<a href="http://asp.net">asp.net</a>'],
+				['http://example.com?1', '<a href="http://example.com?1">example.com?1</a>'],
+				['http://example.com?a=1&b=2', '<a href="http://example.com?a=1&amp;b=2">example.com?a=1&amp;b=2</a>'],
+				['http://test.com/<script>', '<a href="http://test.com/&lt;script>">test.com/&lt;script></a>'],
+				['http://example.com//test.png?1', '<img src="http://example.com//test.png?1" />'],
+				['http://example.com/test.svg?a=1&b=2', '<img src="http://example.com/test.svg?a=1&amp;b=2" />'],
+				['http://example.com/test.svg?a=1&b=2', '<img src="http://example.com/test.svg?a=1&amp;b=2" />'],
+				['start [abbr|expanded] end', 'start <abbr title="expanded">abbr</abbr> end'],
+				['start [abbr|expanded|more] end', 'start <abbr title="expanded|more">abbr</abbr> end'],
+				['start \\[abbr|expanded] end', 'start [abbr|expanded] end'],
+				['[test](http://example.com)', '<a href="http://example.com">test</a>'],
+				['![test](http://example.com/test.jpg)', '<img alt="test" src="http://example.com/test.jpg" />'],
+			],
+				failed = [];
+			inlineExtrasTests = inlineExtrasTests.concat(inlineExtrasTests.map(function(val) {
+				return [val[0] + ' ' + val[0], val[1] + ' ' + val[1]];
+			}));
+			for (var i = 0; i < inlineExtrasTests.length; i++) {
+				result = markdown(inlineExtrasTests[i][0]);
+				if (result != inlineExtrasTests[i][1]) failed.push(inlineExtrasTests[i].concat(result));
+			}
+			var h2 = document.createElement('h2');
+			h2.appendChild(document.createTextNode('Inline extras (links, images, etc.)'));
+			if (failed.length == 0) {
+				h2.appendChild(document.createTextNode(' - passed'));
+				h2.classList.add('pass');
+				output.appendChild(h2);
+			} else {
+				h2.appendChild(document.createTextNode(' - failed ' + failed.length + ' of ' + inlineExtrasTests.length));
+				h2.classList.add('fail');
+				output.appendChild(h2);
+				var details = document.createElement('details');
+				var summary = document.createElement('summary');
+				summary.appendChild(document.createTextNode('Failed tests'));
+				details.appendChild(summary);
+				for (var i = 0; i < failed.length; i++) {
+					var div = document.createElement('div');
+					div.appendChild(document.createTextNode('Test was:'));
+					var test = document.createElement('pre');
+					test.appendChild(document.createTextNode(failed[i][0]));
+					div.appendChild(test);
+					div.appendChild(document.createTextNode('Expected:'));
+					var expected = document.createElement('pre');
+					expected.appendChild(document.createTextNode(failed[i][1]));
+					div.appendChild(expected);
+					div.appendChild(document.createTextNode('Result:'));
+					var result = document.createElement('pre');
+					result.appendChild(document.createTextNode(failed[i][2]));
+					div.appendChild(result);
+					details.appendChild(div);
+				}
+				output.appendChild(details);
+			}
 			var blockTests = [
 				['Hello\nworld', '<p>Hello</p><p>world</p>'],
+				['------', '<del></del>'],
+				['------------', '<hr />'],
+				['------------------------', '<hr />'],
+				['\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-', '------------'],
 				['# h1', '<h1>h1</h1>'],
 				['## h2', '<h2>h2</h2>'],
 				['### h3', '<h3>h3</h3>'],
