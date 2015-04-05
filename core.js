@@ -131,7 +131,7 @@ function inlineMarkdown(input) {
 	}).join('') + open.join('');
 }
 function markdown(input) {
-	if (input.indexOf('\n') == -1 && input.substr(0, 2) != '> ' && input.substr(0, 2) != '- ' && input.substr(0, 2) != '* ' && input.substr(0, 4) != '    ' && input[0] != '\t' && !input.match(/^((\d+|[A-z])[.)]|#{1,6}) /)) return inlineMarkdown(input);
+	if (input.indexOf('\n') == -1 && input.substr(0, 2) != '> ' && input.substr(0, 3) != '>! ' && input.substr(0, 2) != '- ' && input.substr(0, 2) != '* ' && input.substr(0, 4) != '    ' && input[0] != '\t' && !input.match(/^((\d+|[A-z])[.)]|#{1,6}) /) && !input.match(/^[-–—]{12,}$/)) return inlineMarkdown(input);
 	var blockquote = '',
 		ul = '',
 		ol = '',
@@ -149,6 +149,16 @@ function markdown(input) {
 				var arg = blockquote + val;
 				blockquote = '';
 				return '<blockquote>' + markdown(arg) + '</blockquote>';
+			}
+		} else if (val.substr(0, 3) == '>! ') {
+			val = val.substr(3);
+			if (arr[i + 1] && arr[i + 1].substr(0, 3) == '>! ') {
+				blockquote += val + '\n';
+				return '';
+			} else {
+				var arg = blockquote + val;
+				blockquote = '';
+				return '<blockquote class="spoiler">' + markdown(arg) + '</blockquote>';
 			}
 		} else if (val.substr(0, 2) == '- ' || val.substr(0, 2) == '* ') {
 			if (!ul) ul = '<ul>';
@@ -228,6 +238,8 @@ function markdown(input) {
 			return '';
 		} else if ((f = val.match(/^#{1,6} /)) && (f = f[0].length - 1)) {
 			return '<h' + f + '>' + inlineMarkdown(val.substr(f + 1)) + '</h' + f + '>';
+		} else if (val.match(/^[-–—]{12,}$/)) {
+			return '<hr />';
 		} else return '<p>' + inlineMarkdown(val) + '</p>';
 	}).join('');
 }
