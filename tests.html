@@ -53,62 +53,74 @@
 			}
 			var inlines = [
 				{
-					md: '*',
+					mds: '*',
+					mde: '*',
 					start: '<em>',
 					end: '</em>'
 				},
 				{
-					md: '**',
+					mds: '**',
+					mde: '**',
 					start: '<strong>',
 					end: '</strong>'
 				},
 				{
-					md: '_',
+					mds: '_',
+					mde: '_',
 					start: '<i>',
 					end: '</i>'
 				},
 				{
-					md: '–––',
+					mds: '–––',
+					mde: '–––',
 					start: '<s>',
 					end: '</s>'
 				},
 				{
-					md: '+++',
+					mds: '+++',
+					mde: '+++',
 					start: '<ins>',
 					end: '</ins>'
 				},
 				{
-					md: '---',
+					mds: '---',
+					mde: '---',
 					start: '<del>',
 					end: '</del>'
 				},
 				{
-					md: '^^',
+					mds: '^(',
+					mde: ')^',
 					start: '<sup>',
 					end: '</sup>'
 				},
 				{
-					md: 'vv',
+					mds: 'v(',
+					mde: ')v',
 					start: '<sub>',
 					end: '</sub>'
 				},
 				{
-					md: '[c]',
+					mds: '[c]',
+					mde: '[c]',
 					start: '<cite>',
 					end: '</cite>'
 				},
 				{
-					md: '[s]',
+					mds: '[sm]',
+					mde: '[/sm]',
 					start: '<small>',
 					end: '</small>'
 				},
 				{
-					md: '[u]',
+					mds: '[u]',
+					mde: '[u]',
 					start: '<u>',
 					end: '</u>'
 				},
 				{
-					md: '[v]',
+					mds: '[v]',
+					mde: '[v]',
 					start: '<var>',
 					end: '</var>'
 				}
@@ -116,7 +128,7 @@
 			var inlineFormattingTests = [];
 			for (var n = 1; n < inlines.length; n++) {
 				var lim = Math.pow(inlines.length, n);
-				outer: for (i = 0; i < lim; i += i > inlines.length * inlines.length ? Math.random() * Math.sqrt(i) * 10 : 1) {
+				outer: for (i = 0; i < lim; i += i > inlines.length * inlines.length ? Math.random() * Math.pow(2, i / 500) : 1) {
 					var arr = [];
 					for (var j = 0; j < n; j++) {
 						var el = inlines[Math.floor(i / Math.pow(inlines.length, j)) % inlines.length];
@@ -125,14 +137,14 @@
 					}
 					var f = ['start ', 'start '];
 					for (var j = 0; j < n; j++) {
-						f[0] += arr[j].md;
+						f[0] += arr[j].mds;
 						f[1] += arr[j].start;
 					}
 					if (f[0].indexOf('***') != -1) continue;
 					f[0] += 'test';
 					f[1] += 'test';
 					for (var j = n - 1; j >= 0; j--) {
-						f[0] += arr[j].md;
+						f[0] += arr[j].mde;
 						f[1] += arr[j].end;
 					}
 					f[0] += ' end';
@@ -226,22 +238,15 @@
 				}
 				output.appendChild(details);
 			}
-			var inlineEscapeTests = [
-				['start \\* end', 'start * end'],
-				['start \\_ end', 'start _ end'],
-				['start \\--- end', 'start --- end'],
-				['start \\+++ end', 'start +++ end'],
+			var inlineEscapeTests = inlines.map(function(i) {
+				if (i.mds == '**') return ['start \\**test*\\* end', 'start *<em>test</em>* end'];
+				return ['start \\' + i.mds + 'test\\' + i.mde + ' end', 'start ' + i.mds + 'test' + i.mde + ' end'];
+			}).concat([
 				['start \\^test end', 'start ^test end'],
-				['start \\^(test) end', 'start ^(test) end'],
-				['start ^\\(test) end', 'start ^(test) end'],
-				['start ^(test\\) end', 'start ^(test) end'],
-				['start \\$(test) end', 'start $(test) end'],
-				['start $\\(test) end', 'start $(test) end'],
-				['start $(test\\) end', 'start $(test) end'],
 				['&amp;&lt; end', '&amp;amp;&amp;lt; end'],
 				['<script> end', '&lt;script> end'],
 				['\\\\.\\#\\>', '\\.#>']
-			],
+			]),
 				failed = [];
 			for (var i = 0; i < inlineEscapeTests.length; i++) {
 				result = markdown(inlineEscapeTests[i][0]);

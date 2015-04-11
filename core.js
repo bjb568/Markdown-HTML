@@ -12,7 +12,6 @@ function warning(message) {
 	console.log(message);
 }
 function spanMarkdown(input) {
-	console.log('i', input)
 	input = html(input);
 	while (input.match(/\^([\w\^]+)/)) input = input.replace(/\^([\w\^]+)/, '<sup>$1</sup>');
 	return input
@@ -40,15 +39,26 @@ function inlineMarkdown(input) {
 			'–––': 's',
 			'+++': 'ins',
 			'---': 'del',
-			'^^': 'sup',
-			'vv': 'sub',
 			'[c]': 'cite',
-			'[s]': 'small',
 			'[m]': 'mark',
 			'[u]': 'u',
 			'[v]': 'var',
 			'::': 'kbd',
 			'"': 'q'
+		},
+		stags = {
+			sup: {
+				start: '^(',
+				end: ')^'
+			},
+			sub: {
+				start: 'v(',
+				end: ')v'
+			},
+			small: {
+				start: '[sm]',
+				end: '[/sm]'
+			}
 		};
 	outer: for (var i = 0; i < input.length; i++) {
 		if (['code', 'samp'].indexOf(current[current.length - 1]) == -1) {
@@ -66,6 +76,27 @@ function inlineMarkdown(input) {
 						}
 						i += l - 1;
 						continue outer;
+					}
+				}
+				for (var j in stags) {
+					for (var l = 5; l >= 0; l--) {
+						if (stags[j].start == input.substr(i, l)) {
+							output += spanMarkdown(span) + '<' + j + '>';
+							span = '';
+							current.push(stags[j].end);
+							i += l - 1;
+							continue outer;
+						} else if (stags[j].end == input.substr(i, l)) {
+							if (current[current.length - 1] == stags[j].end) {
+								output += spanMarkdown(span) + '</' + j + '>';
+								span = '';
+								current.pop();
+								i += l - 1;
+								continue outer;
+							} else {
+								warning('Illegal close tag "' + stags[j].end + '" found');
+							}
+						}
 					}
 				}
 				span += input[i];
