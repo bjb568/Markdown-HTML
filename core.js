@@ -19,6 +19,7 @@ function spanMarkdown(input) {
 		.replaceAll('\u0001', '^')
 		.replace(/\[(.+?)\|(.+?)\]/g, '<abbr title="$2">$1</abbr>')
 		.replaceAll('\u0002', '[')
+		.replace(/\[\[(\d+)\](.*?)\]/g, '<sup class="reference" title="$2">[$1]</sup>')
 		.replace(/!\[([^\]]+)]\((https?:\/\/[^\s("\\]+\.[^\s"\\]+)\)/g, '<img alt="$1" src="$2" />')
 		.replace(/^(https?:\/\/([^\s("\\]+\.[^\s"\\]+\.(svg|png|tiff|jpg|jpeg)(\?[^\s"\\\/]*)?))/g, '<img src="$1" />')
 		.replace(/\[([^\]]+)]\((https?:\/\/[^\s("\\]+\.[^\s"\\]+)\)/g, '$1'.link('$2'))
@@ -43,6 +44,7 @@ function inlineMarkdown(input) {
 			'vv': 'sub',
 			'[c]': 'cite',
 			'[s]': 'small',
+			'[m]': 'mark',
 			'[u]': 'u',
 			'[v]': 'var',
 			'::': 'kbd',
@@ -83,12 +85,13 @@ function inlineMarkdown(input) {
 	return output;
 }
 function markdown(input) {
-	if (input.indexOf('\n') == -1 && input.substr(0, 2) != '> ' && input.substr(0, 3) != '>! ' && input.substr(0, 2) != '- ' && input.substr(0, 2) != '* ' && input.substr(0, 4) != '    ' && input[0] != '\t' && !input.match(/^((\d+|[A-z])[.)]|#{1,6}) /) && !input.match(/^[-–—]{12,}$/)) return inlineMarkdown(input);
+	if (input.indexOf('\n') == -1 && input.substr(0, 2) != '> ' && input.substr(0, 3) != '>! ' && input.substr(0, 2) != '- ' && input.substr(0, 2) != '* ' && input.substr(0, 4) != '    ' && input[0] != '\t' && !input.match(/^((\d+|[A-z])[.)]|#{1,6}|cite\[\d+\]:) /) && !input.match(/^[-–—]{12,}$/)) return inlineMarkdown(input);
 	var blockquote = '',
 		ul = '',
 		ol = '',
 		li = '',
-		code = '';
+		code = '',
+		i;
 	return input.split('\n').map(function(val, i, arr) {
 		if (!val) return '';
 		var f;
@@ -192,6 +195,8 @@ function markdown(input) {
 			return '<h' + f + '>' + inlineMarkdown(val.substr(f + 1)) + '</h' + f + '>';
 		} else if (val.match(/^[-–—]{12,}$/)) {
 			return '<hr />';
+		} else if (i = val.match(/^cite\[(\d+)\]: /)) {
+			return '<div><sup class="reference-list">' + i[1] + '</sup> ' + inlineMarkdown(val.substr(i[0].length)) + '</div>';
 		} else return '<p>' + inlineMarkdown(val) + '</p>';
 	}).join('');
 }
