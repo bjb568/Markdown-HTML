@@ -290,14 +290,14 @@
 				['http://example.com?1', '<a href="http://example.com?1">example.com?1</a>'],
 				['http://example.com?a=1&b=2', '<a href="http://example.com?a=1&amp;b=2">example.com?a=1&amp;b=2</a>'],
 				['http://test.com/<script>', '<a href="http://test.com/&lt;script>">test.com/&lt;script></a>'],
-				['http://example.com//test.png?1', '<img src="http://example.com//test.png?1" />'],
-				['http://example.com/test.svg?a=1&b=2', '<img src="http://example.com/test.svg?a=1&amp;b=2" />'],
-				['http://example.com/test.svg?a=1&b=2', '<img src="http://example.com/test.svg?a=1&amp;b=2" />'],
+				['http://example.com//test.png?1', '<img src="https://example.com//test.png?1" />'],
+				['http://example.com/test.svg?a=1&b=2', '<img src="https://example.com/test.svg?a=1&amp;b=2" />'],
+				['http://example.com/test.svg?a=1&b=2', '<img src="https://example.com/test.svg?a=1&amp;b=2" />'],
 				['start [abbr|expanded] end', 'start <abbr title="expanded">abbr</abbr> end'],
 				['start [abbr|expanded|more] end', 'start <abbr title="expanded|more">abbr</abbr> end'],
 				['start \\[abbr|expanded] end', 'start [abbr|expanded] end'],
 				['[test](http://example.com)', '<a href="http://example.com">test</a>'],
-				['![test](http://example.com/test.jpg)', '<img alt="test" src="http://example.com/test.jpg" />'],
+				['![test](http://example.com/test.jpg)', '<img alt="test" src="https://example.com/test.jpg" />'],
 			],
 				failed = [];
 			inlineExtrasTests = inlineExtrasTests.concat(inlineExtrasTests.map(function(val) {
