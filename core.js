@@ -6,7 +6,7 @@ String.prototype.replaceAll = function(find, replace) {
 };
 function html(input, replaceQuoteOff) {
 	if (replaceQuoteOff) return input.toString().replaceAll(['&', '<'], ['&amp;', '&lt;']);
-	return input.toString().replaceAll(['&', '<', '"'], ['&amp;', '&lt;', '&quot;']);
+	return input.toString().replaceAll(['&', '<', '"', '\b'], ['&amp;', '&lt;', '&quot;', '']);
 }
 function warning(message) {
 	console.log(message);
