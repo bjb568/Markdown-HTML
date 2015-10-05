@@ -299,6 +299,7 @@
 				['[test](http://example.com)', '<p><a href="http://example.com">test</a></p>'],
 				['![test](http://example.com/test.jpg)', '<p><img alt="test" src="https://example.com/test.jpg" /></p>'],
 				['![test][100px](http://example.com/test.jpg)', '<p><img alt="test" style="width: 100px" src="https://example.com/test.jpg" /></p>'],
+				['[![Nested image](http://asfd.com/a.jpg)](http://link.com/)', '<p><a href="http://link.com/"><img alt="Nested image" src="https://asfd.com/a.jpg" /></a></p>']
 			],
 				failed = [];
 			inlineExtrasTests = inlineExtrasTests.concat(inlineExtrasTests.map(function(val) {
