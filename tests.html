@@ -245,7 +245,8 @@
 				['start \\^test end', '<p>start ^test end</p>'],
 				['&amp;&lt; end', '<p>&amp;amp;&amp;lt; end</p>'],
 				['<script> end', '<p>&lt;script> end</p>'],
-				['\\\\.\\#\\>', '<p>\\.#></p>']
+				['\\\\.\\#\\>', '<p>\\.#></p>'],
+				['$(())^(()', '<p>$(())<sup>()</sup></p>']
 			]),
 				failed = [];
 			for (var i = 0; i < inlineEscapeTests.length; i++) {
