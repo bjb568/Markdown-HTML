@@ -1,3 +1,4 @@
+'use strict';
 String.prototype.replaceAll = function(find, replace) {
 	if (typeof find == 'string') return this.split(find).join(replace);
 	var t = this, i, j;
@@ -23,7 +24,7 @@ function spanMarkdown(input) {
 		.replace(/!\[([^\[\]]+?)]\(https?:\/\/([^\s("\\]+?\.[^\s"\\]+?)\)/g, '<img alt="$1" src="https://$2" />')
 		.replace(/\[([^\[\]]+)]\((https?:\/\/[^\s()"\[\]]+?\.[^\s"\\\[\]]+?)\)/g, '$1'.link('$2'))
 		.replace(/(\s|^)https?:\/\/([^\s()"]+?\.[^\s"]+?\.(svg|png|tiff|jpg|jpeg)(\?[^\s"\/]*)?)/g, '$1<img src="https://$2" />')
-		.replace(/(\s|^)(https?:\/\/([^\s()"]+?\.[^\s"()]+))/g, '$1' + '$3'.link('$2'))
+		.replace(/(\s|^)(https?:\/\/([^\s()"]+?\.[^\s"()]+))/g, '$1' + '$3'.link('$2'));
 }
 function inlineMarkdown(input) {
 	var output = '',
@@ -117,8 +118,7 @@ function markdown(input) {
 		ul = '',
 		ol = '',
 		li = '',
-		code = '',
-		i;
+		code = '';
 	return input.split('\n').map(function(val, i, arr) {
 		if (!val) return '';
 		var f;
