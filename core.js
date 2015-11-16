@@ -14,7 +14,7 @@ function warning(message) {
 }
 function spanMarkdown(input) {
 	input = html(input);
-	while (input.match(/\^([\w\^]+)/)) input = input.replace(/\^([\w\^]+)/, '<sup>$1</sup>');
+	while (/\^([\w\^]+)/.test(input)) input = input.replace(/\^([\w\^]+)/, '<sup>$1</sup>');
 	return input
 		.replaceAll('\u0001', '^')
 		.replace(/\[(.+?)\|(.+?)\]/g, '<abbr title="$2">$1</abbr>')
@@ -167,7 +167,7 @@ function markdown(input) {
 				ol += '<li>' + markdown(li) + '</li>';
 				li = '';
 			}
-			if (arr[i + 1] && arr[i + 1].match(/^(\d+|[A-z])[.)] /)) {
+			if (/^(\d+|[A-z])[.)] /.test(arr[i + 1])) {
 				ol += '<li>' + inlineMarkdown(val) + '</li>';
 				return '';
 			} else if (arr[i + 1] && (arr[i + 1][0] == '\t' || arr[i + 1] && arr[i + 1].substr(0, 4) == '    ')) {
@@ -184,7 +184,7 @@ function markdown(input) {
 				var arg = ul + '<li>' + markdown(li) + '</li>';
 				li = '';
 				return arg + '</ul>';
-			} else if (ol && (!arr[i + 1] || (arr[i + 1][0] != '\t' && arr[i + 1].substr(0, 4) != '    ' && !arr[i + 1].match(/^(\d+|[A-z])[.)] /)))) {
+			} else if (ol && (!arr[i + 1] || (arr[i + 1][0] != '\t' && arr[i + 1].substr(0, 4) != '    '))) {
 				var arg = ol + '<li>' + markdown(li) + '</li>';
 				li = '';
 				return arg + '</ol>';
@@ -196,7 +196,7 @@ function markdown(input) {
 				var arg = ul + '<li>' + markdown(li) + '</li>';
 				li = '';
 				return arg + '</ul>';
-			} else if (ol && (!arr[i + 1] || (arr[i + 1][0] != '\t' && arr[i + 1].substr(0, 4) != '    ' && !arr[i + 1].match(/^((\d+|[A-z])|[A-z])[.)] /)))) {
+			} else if (ol && (!arr[i + 1] || (arr[i + 1][0] != '\t' && arr[i + 1].substr(0, 4) != '    '))) {
 				var arg = ol + '<li>' + markdown(li) + '</li>';
 				li = '';
 				return arg + '</ol>';
@@ -220,7 +220,7 @@ function markdown(input) {
 			return '';
 		} else if ((f = val.match(/^#{1,6} /)) && (f = f[0].length - 1)) {
 			return '<h' + f + '>' + inlineMarkdown(val.substr(f + 1)) + '</h' + f + '>';
-		} else if (val.match(/^[-–—]{12,}$/)) {
+		} else if (/^[-–—]{12,}$/.test(val)) {
 			return '<hr />';
 		} else if (i = val.match(/^cite\[(\d+)\]: /)) {
 			return '<div><sup class="reference-list">' + i[1] + '</sup> ' + inlineMarkdown(val.substr(i[0].length)) + '</div>';
