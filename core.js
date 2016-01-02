@@ -5,9 +5,8 @@ String.prototype.replaceAll = function(find, replace) {
 	while (typeof(i = find.shift()) == 'string' && typeof(j = replace.shift()) == 'string') t = t.replaceAll(i || '', j || '');
 	return t;
 };
-function html(input, attribute) {
-	if (attribute) return input.toString().replaceAll(['&', '<', '"', '\t', '\n', '\b'], ['&amp;', '&lt;', '&quot;', '&#9;', '&#10;', '']);
-	return input.toString().replaceAll(['&', '<', '\b'], ['&amp;', '&lt;', '']);
+function html(input) {
+	return input.toString().replaceAll(['&', '<', '>', '"', '\t', '\n', '\b'], ['&amp;', '&lt;', '&gt;', '&quot;', '&#9;', '&#10;', '']);
 }
 function warning(message) {
 	console.log(message);
