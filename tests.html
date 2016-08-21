@@ -199,7 +199,7 @@
 				return [val[0].replace('test', '`test`'), val[1].replace('test', '<code>test</code>')];
 			}).concat([
 				['start `*_---+++test^foo$(bar)<&` end', '<p>start <code>*_---+++test^foo$(bar)&lt;&amp;</code> end</p>'],
-				['start `\\\\.\\#\\>` end', '<p>start <code>\\\\.\\#\\></code> end</p>']
+				['start `\\\\.\\#\\>` end', '<p>start <code>\\\\.\\#\\&gt;</code> end</p>']
 			]),
 				failed = [];
 			for (var i = 0; i < inlineCodeTests.length; i++) {
@@ -244,8 +244,8 @@
 			}).concat([
 				['start \\^test end', '<p>start ^test end</p>'],
 				['&amp;&lt; end', '<p>&amp;amp;&amp;lt; end</p>'],
-				['<script> end', '<p>&lt;script> end</p>'],
-				['\\\\.\\#\\>', '<p>\\.#></p>'],
+				['<script> end', '<p>&lt;script&gt; end</p>'],
+				['\\\\.\\#\\>', '<p>\\.#&gt;</p>'],
 				['$(())^(()', '<p>$(())<sup>()</sup></p>']
 			]),
 				failed = [];
@@ -290,7 +290,7 @@
 				['http://asp.net', '<p><a href="http://asp.net">asp.net</a></p>'],
 				['http://example.com?1', '<p><a href="http://example.com?1">example.com?1</a></p>'],
 				['http://example.com?a=1&b=2', '<p><a href="http://example.com?a=1&amp;b=2">example.com?a=1&amp;b=2</a></p>'],
-				['http://test.com/<script>', '<p><a href="http://test.com/&lt;script>">test.com/&lt;script></a></p>'],
+				['http://test.com/<script>', '<p><a href="http://test.com/&lt;script&gt;">test.com/&lt;script&gt;</a></p>'],
 				['http://example.com//test.png?1', '<p><img src="https://example.com//test.png?1" /></p>'],
 				['http://example.com/test.svg?a=1&b=2', '<p><img src="https://example.com/test.svg?a=1&amp;b=2" /></p>'],
 				['http://example.com/test.svg?a=1&b=2', '<p><img src="https://example.com/test.svg?a=1&amp;b=2" /></p>'],
@@ -356,11 +356,11 @@
 				['###### h6', '<h6>h6</h6>'],
 				['####### h7', '<p>####### h7</p>'],
 				['    code^block', '<code class="blk">code^block</code>'],
-				['    code^block\n    *line 2*', '<code class="blk">code^block\n*line 2*</code>'],
+				['    code^block\n    *line 2*', '<code class="blk">code^block&#10;*line 2*</code>'],
 				['    code^block\nhi', '<code class="blk">code^block</code><p>hi</p>'],
 				['\tcode^block', '<code class="blk">code^block</code>'],
-				['\tcode^block\n    *line 2*', '<code class="blk">code^block\n*line 2*</code>'],
-				['\tcode^block\n\t*line 2*', '<code class="blk">code^block\n*line 2*</code>'],
+				['\tcode^block\n    *line 2*', '<code class="blk">code^block&#10;*line 2*</code>'],
+				['\tcode^block\n\t*line 2*', '<code class="blk">code^block&#10;*line 2*</code>'],
 				['\tcode^block\nhi', '<code class="blk">code^block</code><p>hi</p>'],
 				['- Hello\nworld', '<ul><li>Hello</li></ul><p>world</p>'],
 				['* Hello\nworld', '<ul><li>Hello</li></ul><p>world</p>'],
@@ -525,7 +525,7 @@
 				['a\\. test', '<p>a. test</p>'],
 				['1\\) test', '<p>1) test</p>'],
 				['1\\. test', '<p>1. test</p>'],
-				['\\> test', '<p>> test</p>'],
+				['\\> test', '<p>&gt; test</p>'],
 				['* <&', '<ul><li>&lt;&amp;</li></ul>'],
 				['- <&', '<ul><li>&lt;&amp;</li></ul>'],
 				['a) <&', '<ol><li>&lt;&amp;</li></ol>'],

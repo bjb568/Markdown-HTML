@@ -6,7 +6,7 @@ String.prototype.replaceAll = function(find, replace) {
 	return t;
 };
 function html(input) {
-	return input.toString().replaceAll(['&', '<', '>', '"', '\t', '\n', '\b'], ['&amp;', '&lt;', '&gt;', '&quot;', '&#9;', '&#10;', '']);
+	return input.toString().replaceAll(['&', '<', '>', '"', '\t', '\n', '\r', '\b'], ['&amp;', '&lt;', '&gt;', '&quot;', '&#9;', '&#10;', '', '']);
 }
 function warning(message) {
 	console.log(message);
