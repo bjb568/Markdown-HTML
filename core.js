@@ -11,6 +11,16 @@ function html(input) {
 function warning(message) {
 	console.log(message);
 }
+function parseURL(url) {
+	var match = url.match(/(?:([^:/?#]+):)?(?:\/\/([^/?#]*))?([^?#]*)(\\?(?:[^#]*))?(#(?:.*))?/);
+	return {
+		scheme: match[1] || '',
+		host: match[2] || '',
+		path: match[3] || '',
+		query: match[4] || '',
+		fragment: match[5] || ''
+	};
+}
 function spanMarkdown(input) {
 	input = html(input);
 	while (/\^([\w\^]+)/.test(input)) input = input.replace(/\^([\w\^]+)/, '<sup>$1</sup>');
@@ -22,8 +32,15 @@ function spanMarkdown(input) {
 		.replace(/\[\[ !\[([^\[\]]+?)]\(https?:\/\/([^\s("\\]+?\.[^\s"\\]+?)\) \]\]/g, '<img alt="$1" class="center" src="https://$2" />')
 		.replace(/!\[([^\[\]]+?)]\(https?:\/\/([^\s("\\]+?\.[^\s"\\]+?)\)/g, '<img alt="$1" src="https://$2" />')
 		.replace(/\[([^\[\]]+)]\((https?:\/\/[^\s()"\[\]]+?\.[^\s"\\\[\]]+?)\)/g, '$1'.link('$2'))
-		.replace(/(\s|^)https?:\/\/([^\s()"]+?\.[^\s"]+?\.(svg|png|tiff|jpg|jpeg)(\?[^\s"\/]*)?)/g, '$1<img src="https://$2" />')
-		.replace(/(\s|^)(https?:\/\/([^\s()"]+?\.[^\s"()]+))/g, '$1' + '$3'.link('$2'));
+		.replace(/(\s|^)https?:\/\/([^\s()"]+?\.[^\s"]+?\.(svg|png|tiff|jpg|jpeg)(\?[^\s"\/]*)?)/g, '$1<img src="https://$2" alt="user image" />')
+		.replace(/(\s|^)(https?:\/\/([^\s()"]+?\.[^\s"()]+))/g, function(m, p1, p2, p3) {
+			var parsed = parseURL(p2.replace('youtu.be/', 'youtube.com/watch?v='));
+			var i;
+			if (
+				/(^|.+\.)youtube\.com$/.test(parsed.host) && (i = parsed.query.match(/^\?(.+?&)?v=([^&]+)/))
+			) return '<div class="max-width"><div class="iframe-16-9"><iframe src="https://www.youtube.com/embed/' + i[2] + '" frameborder="0" allowfullscreen=""></iframe></div></div>';
+			return p1 + p3.link(p2);
+		});
 }
 function inlineMarkdown(input) {
 	var output = '',
